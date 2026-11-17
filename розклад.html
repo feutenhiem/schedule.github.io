@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Розклад уроків — 10-Г клас</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #273449;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --purple: #a855f7;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding: 20px 16px 48px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+
+    .title-group h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .clock {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: capitalize;
+    }
+
+    /* Week Switcher */
+    .week-switcher {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .segmented button.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+    }
+
+    .week-hint {
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    /* Hero Current Lesson Card */
+    .hero-card {
+      background: linear-gradient(145deg, #1e293b, #172033);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-card.live {
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .hero-card.break {
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+
+    .badge.live {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge.break {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge.idle {
+      background: rgba(148, 163, 184, 0.15);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    .timer {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .hero-subject {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 0.96rem;
+      margin-bottom: 20px;
+    }
+
+    .hero-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--green);
+      border-radius: 999px;
+      transition: width 0.5s linear;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-join {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 13px 24px;
+      border-radius: 12px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-join:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-copy {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 13px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: #334155;
+    }
+
+    .next-preview {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .next-preview strong {
+      color: var(--text);
+    }
+
+    .next-preview a {
+      color: #60a5fa;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .next-preview a:hover {
+      text-decoration: underline;
+    }
+
+    /* Schedule Section */
+    .schedule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .day-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .day-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .day-tab:hover {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+
+    .day-tab.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .day-tab.today-mark::after {
+      content: " •";
+      color: var(--green);
+    }
+
+    .day-tab.active.today-mark::after {
+      color: #fff;
+    }
+
+    .lesson-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .lesson-item {
+      display: grid;
+      grid-template-columns: 36px 96px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .lesson-item.current {
+      border-color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .lesson-item.next {
+      border-color: var(--amber);
+      background: rgba(245, 158, 11, 0.06);
+    }
+
+    .lesson-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .lesson-item.current .lesson-num {
+      background: var(--green);
+      color: #052e16;
+    }
+
+    .lesson-time {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .lesson-info {
+      min-width: 0;
+    }
+
+    .lesson-name {
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .week-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .week-tag.чис {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+    }
+
+    .week-tag.знам {
+      background: rgba(168, 85, 247, 0.2);
+      color: #d8b4fe;
+    }
+
+    .lesson-teacher {
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .lesson-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 9px;
+      background: var(--surface-2);
+      color: #93c5fd;
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .lesson-link:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    @media (max-width: 640px) {
+      .week-switcher {
+        align-items: flex-start;
+        width: 100%;
+      }
+      .lesson-item {
+        grid-template-columns: 32px 1fr auto;
+        grid-template-rows: auto auto;
+        gap: 6px 12px;
+      }
+      .lesson-num {
+        grid-row: 1 / 3;
+      }
+      .lesson-time {
+        grid-column: 2;
+        font-size: 0.8rem;
+      }
+      .lesson-info {
+        grid-column: 2;
+      }
+      .lesson-link {
+        grid-column: 3;
+        grid-row: 1 / 3;
+      }
+      .hero-subject {
+        font-size: 1.45rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="title-group">
+        <h1>10 - Г клас • Розклад</h1>
+        <div class="clock" id="clock">Завантаження...</div>
+      </div>
+
+      <div class="week-switcher">
+        <div class="segmented" role="group" aria-label="Вибір тижня">
+          <button id="btnChis" type="button" onclick="setWeek('чис')">1 тиждень (чис)</button>
+          <button id="btnZnam" type="button" onclick="setWeek('знам')">2 тиждень (знам)</button>
+        </div>
+        <div class="week-hint">Автоматично змінюється щопонеділка</div>
+      </div>
+    </header>
+
+    <!-- Current / Next Lesson Card -->
+    <section class="hero-card" id="heroCard"></section>
+
+    <!-- Full Schedule -->
+    <section class="schedule-card">
+      <div class="day-tabs" id="dayTabs"></div>
+      <div class="lesson-list" id="lessonList"></div>
+    </section>
+  </div>
+
+  <script>
+    const BELLS = {
+      1: { start: "08:30", end: "09:15" },
+      2: { start: "09:25", end: "10:10" },
+      3: { start: "10:20", end: "11:05" },
+      4: { start: "11:20", end: "12:05" },
+      5: { start: "12:15", end: "13:00" },
+      6: { start: "13:10", end: "13:55" },
+      7: { start: "14:05", end: "14:50" },
+      8: { start: "15:00", end: "15:45" }
+    };
+
+    const LINKS = {
+      nadonMov: "https://us04web.zoom.us/j/73362081674?pwd=4maUSaNLyaDxZiAgP4NZT5XsDa41zV.1",
+      nadonLit: "https://us04web.zoom.us/j/74521795521?pwd=9vMA1jM8pEBFRDvaCVXNX8OKVnFiGU.1",
+      haponenko: "https://us04web.zoom.us/j/72312217491?pwd=K9UnvS563DEjXquwfyyx9v3YDHbKqx.1",
+      mahnitska: "https://us04web.zoom.us/j/77820288223?pwd=iBm5YjIRqbJxsqnNGlqu2NYKVOsbbz.1",
+      bondarenko: "https://us04web.zoom.us/j/79042540520?pwd=qaVyfCdub8cDCsbuoVL14bcdSblpCs.1",
+      sakhno: "https://us05web.zoom.us/j/87528585308?pwd=grWUd0xMNdHlmrMMGelu5Pbf3JS5tN.1",
+      yevtushenko: "https://us04web.zoom.us/j/79513085736?pwd=7yN75dxaMHRAmMZ06Nt8TnbpH0xU4Cw.1",
+      korotetska: "https://us04web.zoom.us/j/75970243134?pwd=MvSPQXpbCeBvoEkStzG5bATogJrV3l.1",
+      bahmut: "https://us05web.zoom.us/j/82714730131?pwd=QUM3L0ZQSW1rK2dGZWJoN2VOVklZQT09",
+      zoshchuk: "https://us04web.zoom.us/j/79949652405?pwd=TGAtwr5knka10whPsvnP9feCL7w3In.1",
+      kharchenko: "https://us04web.zoom.us/j/75122591177?pwd=OZhmTbCOhonXsoliT4RmipUUQXukUw.1",
+      oleksandrenko: "https://us05web.zoom.us/j/2300684821?pwd=aV7Heh5PIZZvlo77QwTp0ntFlYubXs.1",
+      kurylo: "https://meet.google.com/kwq-rsqk-nix"
+    };
+
+    // dayIndex: 1 = Понеділок ... 5 = П'ятниця
+    const SCHEDULE = {
+      1: [
+        { num: 1, subject: "Українська мова", teacher: "Надьон В.В.", link: LINKS.nadonMov, week: "all" },
+        { num: 2, subject: "Українська література", teacher: "Надьон В.В.", link: LINKS.nadonLit, week: "all" },
+        { num: 3, subject: "Зарубіжна література", teacher: "Гапоненко І.В.", link: LINKS.haponenko, week: "all" },
+        { num: 4, subject: "Фізика", teacher: "Магніцька І.В.", link: LINKS.mahnitska, week: "all" },
+        { num: 5, subject: "Всесвітня історія", teacher: "Бондаренко Ю.Л.", link: LINKS.bondarenko, week: "all" },
+        { num: 6, subject: "Фізична культура", teacher: "Сахно О.В.", link: LINKS.sakhno, week: "all" },
+        { num: 7, subject: "Інформатика", teacher: "Євтушенко Д.М.", link: LINKS.yevtushenko, week: "знам" }
+      ],
+      2: [
+        { num: 1, subject: "Мистецтво", teacher: "Коротецька В.В.", link: LINKS.korotetska, week: "чис" },
+        { num: 1, subject: "Географія", teacher: "Багмут Л.О.", link: LINKS.bahmut, week: "знам" },
+        { num: 2, subject: "Українська мова", teacher: "Надьон В.В.", link: LINKS.nadonMov, week: "all" },
+        { num: 3, subject: "Англійська мова", teacher: "Зощук В.М.", link: LINKS.zoshchuk, week: "all" },
+        { num: 4, subject: "Історія України", teacher: "Бондаренко Ю.Л.", link: LINKS.bondarenko, week: "all" },
+        { num: 5, subject: "Мистецтво", teacher: "Коротецька В.В.", link: LINKS.korotetska, week: "all" },
+        { num: 6, subject: "Українська література", teacher: "Надьон В.В.", link: LINKS.nadonLit, week: "all" },
+        { num: 7, subject: "Географія", teacher: "Багмут Л.О.", link: LINKS.bahmut, week: "all" }
+      ],
+      3: [
+        { num: 1, subject: "Алгебра", teacher: "Євтушенко Д.М.", link: LINKS.yevtushenko, week: "all" },
+        { num: 2, subject: "Фізична культура", teacher: "Сахно О.В.", link: LINKS.sakhno, week: "all" },
+        { num: 3, subject: "Біологія", teacher: "Харченко В.Є.", link: LINKS.kharchenko, week: "all" },
+        { num: 4, subject: "Англійська мова", teacher: "Зощук В.М.", link: LINKS.zoshchuk, week: "all" },
+        { num: 5, subject: "Англійська мова", teacher: "Зощук В.М.", link: LINKS.zoshchuk, week: "all" },
+        { num: 6, subject: "Біологія", teacher: "Харченко В.Є.", link: LINKS.kharchenko, week: "all" },
+        { num: 7, subject: "Фізика", teacher: "Магніцька І.В.", link: LINKS.mahnitska, week: "all" }
+      ],
+      4: [
+        { num: 1, subject: "Англійська мова", teacher: "Зощук В.М.", link: LINKS.zoshchuk, week: "all" },
+        { num: 2, subject: "Історія України", teacher: "Бондаренко Ю.Л.", link: LINKS.bondarenko, week: "чис" },
+        { num: 2, subject: "Алгебра", teacher: "Євтушенко Д.М.", link: LINKS.yevtushenko, week: "знам" },
+        { num: 3, subject: "Англійська мова", teacher: "Зощук В.М.", link: LINKS.zoshchuk, week: "all" },
+        { num: 4, subject: "Геометрія", teacher: "Євтушенко Д.М.", link: LINKS.yevtushenko, week: "чис" },
+        { num: 4, subject: "Хімія", teacher: "Олександренко Ю.Д.", link: LINKS.oleksandrenko, week: "знам" },
+        { num: 5, subject: "Хімія", teacher: "Олександренко Ю.Д.", link: LINKS.oleksandrenko, week: "all" },
+        { num: 6, subject: "Українська мова", teacher: "Надьон В.В.", link: LINKS.nadonMov, week: "all" },
+        { num: 7, subject: "Захист України", teacher: "Курило Р.В.", link: LINKS.kurylo, week: "all" },
+        { num: 8, subject: "Захист України", teacher: "Курило Р.В.", link: LINKS.kurylo, week: "all" }
+      ],
+      5: [
+        { num: 1, subject: "Українська мова", teacher: "Надьон В.В.", link: LINKS.nadonMov, week: "all" },
+        { num: 2, subject: "Геометрія", teacher: "Євтушенко Д.М.", link: LINKS.yevtushenko, week: "all" },
+        { num: 3, subject: "Громадянська освіта", teacher: "Бондаренко Ю.Л.", link: LINKS.bondarenko, week: "all" },
+        { num: 4, subject: "Фізика", teacher: "Магніцька І.В.", link: LINKS.mahnitska, week: "all" },
+        { num: 5, subject: "Фізична культура", teacher: "Сахно О.В.", link: LINKS.sakhno, week: "all" },
+        { num: 6, subject: "Інформатика", teacher: "Євтушенко Д.М.", link: LINKS.yevtushenko, week: "all" },
+        { num: 7, subject: "Громадянська освіта", teacher: "Бондаренко Ю.Л.", link: LINKS.bondarenko, week: "all" }
+      ]
+    };
+
+    const DAY_NAMES = {
+      1: "Понеділок",
+      2: "Вівторок",
+      3: "Середа",
+      4: "Четвер",
+      5: "П'ятниця"
+    };
+
+    const DAY_SHORT = {
+      1: "Пн",
+      2: "Вт",
+      3: "Ср",
+      4: "Чт",
+      5: "Пт"
+    };
+
+    // Week parity logic: automatically flips every Monday
+    function getWeekIndex(date) {
+      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dayNum = d.getDay() || 7;
+      d.setDate(d.getDate() - (dayNum - 1));
+      const utcMonday = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+      const epochMonday = Date.UTC(2026, 0, 5); // Jan 5, 2026 (Monday)
+      return Math.round((utcMonday - epochMonday) / (7 * 86400000));
+    }
+
+    function getWeekOffset() {
+      const saved = localStorage.getItem("schedule_week_offset");
+      return saved === "1" ? 1 : 0;
+    }
+
+    function getCurrentWeekType(date = new Date()) {
+      const idx = getWeekIndex(date) + getWeekOffset();
+      return Math.abs(idx) % 2 === 0 ? "чис" : "знам";
+    }
+
+    function setWeek(targetType) {
+      const current = getCurrentWeekType();
+      if (current !== targetType) {
+        const nextOffset = getWeekOffset() === 0 ? 1 : 0;
+        localStorage.setItem("schedule_week_offset", String(nextOffset));
+      }
+      render();
+    }
+
+    function toSeconds(hhmm) {
+      const [h, m] = hhmm.split(":").map(Number);
+      return h * 3600 + m * 60;
+    }
+
+    function formatCountdown(totalSec) {
+      const s = Math.max(0, Math.floor(totalSec));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+    }
+
+    function getDayLessons(dayNum, weekType) {
+      const raw = SCHEDULE[dayNum] || [];
+      return raw
+        .filter((l) => l.week === "all" || l.week === weekType)
+        .map((l) => ({
+          ...l,
+          start: BELLS[l.num].start,
+          end: BELLS[l.num].end,
+          startSec: toSeconds(BELLS[l.num].start),
+          endSec: toSeconds(BELLS[l.num].end)
+        }));
+    }
+
+    function getPlatformLabel(url) {
+      return url.includes("meet.google.com") ? "Google Meet" : "Zoom";
+    }
+
+    function copyLink(url, btn) {
+      navigator.clipboard.writeText(url).then(() => {
+        const old = btn.textContent;
+        btn.textContent = "Скопійовано!";
+        setTimeout(() => { btn.textContent = old; }, 1500);
+      });
+    }
+
+    let selectedDay = (() => {
+      const d = new Date().getDay();
+      return d >= 1 && d <= 5 ? d : 1;
+    })();
+
+    function selectDay(day) {
+      selectedDay = day;
+      renderSchedule();
+    }
+
+    function renderHero() {
+      const now = new Date();
+      const day = now.getDay(); // 0=Sun, 1=Mon..5=Fri, 6=Sat
+      const weekType = getCurrentWeekType(now);
+      const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const hero = document.getElementById("heroCard");
+
+      // Update week buttons
+      document.getElementById("btnChis").classList.toggle("active", weekType === "чис");
+      document.getElementById("btnZnam").classList.toggle("active", weekType === "знам");
+
+      // Update clock
+      const formattedDate = now.toLocaleDateString("uk-UA", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+      });
+      const formattedTime = now.toLocaleTimeString("uk-UA", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+      document.getElementById("clock").textContent = `${formattedDate} • ${formattedTime}`;
+
+      if (day >= 1 && day <= 5) {
+        const lessons = getDayLessons(day, weekType);
+        const current = lessons.find((l) => nowSec >= l.startSec && nowSec < l.endSec);
+        const nextToday = lessons.find((l) => l.startSec > nowSec);
+
+        if (current) {
+          const total = current.endSec - current.startSec;
+          const elapsed = nowSec - current.startSec;
+          const remaining = current.endSec - nowSec;
+          const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+
+          hero.className = "hero-card live";
+          hero.innerHTML = `
+            <div class="status-row">
+              <span class="badge live"><span class="dot"></span> Зараз триває • ${current.num} урок</span>
+              <span class="timer">Залишилось: ${formatCountdown(remaining)}</span>
+            </div>
+            <div class="hero-subject">${current.subject}</div>
+            <div class="hero-meta">
+              <span>🕒 ${current.start} – ${current.end}</span>
+              <span>👩‍🏫 ${current.teacher}</span>
+              <span>💻 ${getPlatformLabel(current.link)}</span>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-bar" style="width: ${pct.toFixed(1)}%"></div>
+            </div>
+            <div class="hero-actions">
+              <a class="btn-join" href="${current.link}" target="_blank" rel="noopener noreferrer">
+                Приєднатися до уроку ↗
+              </a>
+              <button class="btn-copy" type="button" onclick="copyLink('${current.link}', this)">
+                Копіювати посилання
+              </button>
+            </div>
+            ${nextToday ? `
+              <div class="next-preview">
+                <span>Наступний (${nextToday.start}): <strong>${nextToday.subject}</strong> (${nextToday.teacher})</span>
+                <a href="${nextToday.link}" target="_blank" rel="noopener noreferrer">Посилання ↗</a>
+              </div>
+            ` : `
+              <div class="next-preview">
+                <span>Це останній урок на сьогодні 🎉</span>
+              </div>
+            `}
+          `;
+          return;
+        }
+
+        if (nextToday) {
+          const isBeforeSchool = nowSec < lessons[0].startSec;
+          const waitSec = nextToday.startSec - nowSec;
+
+          hero.className = "hero-card break";
+          hero.innerHTML = `
+            <div class="status-row">
+              <span class="badge break">
+                <span class="dot"></span>
+                ${isBeforeSchool ? "Уроки ще не почались" : "Зараз перерва"}
+              </span>
+              <span class="timer">Початок через: ${formatCountdown(waitSec)}</span>
+            </div>
+            <div class="hero-subject">Наступний: ${nextToday.subject}</div>
+            <div class="hero-meta">
+              <span>📌 ${nextToday.num} урок</span>
+              <span>🕒 ${nextToday.start} – ${nextToday.end}</span>
+              <span>👩‍🏫 ${nextToday.teacher}</span>
+              <span>💻 ${getPlatformLabel(nextToday.link)}</span>
+            </div>
+            <div class="hero-actions">
+              <a class="btn-join" href="${nextToday.link}" target="_blank" rel="noopener noreferrer">
+                Приєднатися до ${nextToday.num} уроку ↗
+              </a>
+              <button class="btn-copy" type="button" onclick="copyLink('${nextToday.link}', this)">
+                Копіювати посилання
+              </button>
+            </div>
+          `;
+          return;
+        }
+      }
+
+      // After school or weekend: find next school day's 1st lesson
+      let offsetDays = 1;
+      let nextDay = (day + offsetDays) % 7;
+      while (nextDay === 0 || nextDay === 6) {
+        offsetDays++;
+        nextDay = (day + offsetDays) % 7;
+      }
+      const futureDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offsetDays);
+      const futureWeekType = getCurrentWeekType(futureDate);
+      const nextLessons = getDayLessons(nextDay, futureWeekType);
+      const firstNext = nextLessons[0];
+
+      hero.className = "hero-card";
+      hero.innerHTML = `
+        <div class="status-row">
+          <span class="badge idle">${day === 0 || day === 6 ? "Вихідний день" : "Уроки на сьогодні закінчились"}</span>
+          <span class="timer">Тиждень: ${weekType === "чис" ? "Чисельник" : "Знаменник"}</span>
+        </div>
+        <div class="hero-subject">${day === 0 || day === 6 ? "Сьогодні занять немає" : "На сьогодні все!"}</div>
+        ${firstNext ? `
+          <div class="next-preview" style="border-top: none; margin-top: 6px; padding-top: 0;">
+            <span>Наступний навчальний день (${DAY_NAMES[nextDay]}, ${futureWeekType}): <strong>1 урок — ${firstNext.subject}</strong> (${firstNext.start})</span>
+            <a href="${firstNext.link}" target="_blank" rel="noopener noreferrer">Посилання ↗</a>
+          </div>
+        ` : ""}
+      `;
+    }
+
+    function renderSchedule() {
+      const now = new Date();
+      const today = now.getDay();
+      const weekType = getCurrentWeekType(now);
+      const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+      // Render day tabs
+      const tabsEl = document.getElementById("dayTabs");
+      tabsEl.innerHTML = [1, 2, 3, 4, 5].map((d) => {
+        const classes = [
+          "day-tab",
+          selectedDay === d ? "active" : "",
+          today === d ? "today-mark" : ""
+        ].filter(Boolean).join(" ");
+        return `<button class="${classes}" type="button" onclick="selectDay(${d})">${DAY_NAMES[d]}</button>`;
+      }).join("");
+
+      // Render lesson list
+      const lessons = getDayLessons(selectedDay, weekType);
+      const nextToday = selectedDay === today ? lessons.find((l) => l.startSec > nowSec) : null;
+      const hasCurrent = selectedDay === today && lessons.some((l) => nowSec >= l.startSec && nowSec < l.endSec);
+
+      const listEl = document.getElementById("lessonList");
+      listEl.innerHTML = lessons.map((l) => {
+        const isCurrent = selectedDay === today && nowSec >= l.startSec && nowSec < l.endSec;
+        const isNext = !hasCurrent && nextToday && nextToday.num === l.num;
+        const itemClass = [
+          "lesson-item",
+          isCurrent ? "current" : "",
+          isNext ? "next" : ""
+        ].filter(Boolean).join(" ");
+
+        const weekBadge = l.week !== "all"
+          ? `<span class="week-tag ${l.week}">${l.week}</span>`
+          : "";
+
+        return `
+          <div class="${itemClass}">
+            <div class="lesson-num">${l.num}</div>
+            <div class="lesson-time">${l.start}–${l.end}</div>
+            <div class="lesson-info">
+              <div class="lesson-name">${l.subject} ${weekBadge}</div>
+              <div class="lesson-teacher">${l.teacher}</div>
+            </div>
+            <a class="lesson-link" href="${l.link}" target="_blank" rel="noopener noreferrer">
+              ${getPlatformLabel(l.link)} ↗
+            </a>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function render() {
+      renderHero();
+      renderSchedule();
+    }
+
+    render();
+    setInterval(render, 1000);
+  </script>
+</body>
+</html>
