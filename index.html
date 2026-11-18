@@ -499,7 +499,7 @@
           <button id="btnChis" type="button" onclick="setWeek('чис')">1 тиждень (чис)</button>
           <button id="btnZnam" type="button" onclick="setWeek('знам')">2 тиждень (знам)</button>
         </div>
-        <div class="week-hint">Автоматично змінюється щопонеділка</div>
+        <div class="week-hint">Автоматично змінюється щосуботи</div>
       </div>
     </header>
 
@@ -612,13 +612,13 @@
 
     // Week parity logic: automatically flips every Monday
     function getWeekIndex(date) {
-      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const dayNum = d.getDay() || 7;
-      d.setDate(d.getDate() - (dayNum - 1));
-      const utcMonday = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
-      const epochMonday = Date.UTC(2026, 10, 16); // Jan 5, 2026 (Monday)
-      return Math.round((utcMonday - epochMonday) / (7 * 86400000));
-    }
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const daysSinceSaturday = (d.getDay() + 1) % 7; // Sat=0, Sun=1, Mon=2 ... Fri=6
+  d.setDate(d.getDate() - daysSinceSaturday);
+  const utcSaturday = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  const epochSaturday = Date.UTC(2026, 10, 14); // Saturday, Nov 14, 2026 ("чис" week)
+  return Math.round((utcSaturday - epochSaturday) / (7 * 86400000));
+}
 
     function getWeekOffset() {
       const saved = localStorage.getItem("schedule_week_offset");
